@@ -1,0 +1,71 @@
+[project]
+name = "claude-halo"
+version = "0.1.0"
+description = "Claude Halo — assistant vocal Jarvis en TUI : wake word, orbe audio-réactive, réponses Claude streamées."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "textual>=1.0",
+    "anthropic>=0.50",
+    "sounddevice>=0.5",
+    "numpy>=1.26",
+    "faster-whisper>=1.0",
+    "keyring>=25",
+    "platformdirs>=4.2",
+    "tomli-w>=1.0",
+    "psutil>=6.0",
+    "pywin32>=308; sys_platform == 'win32'",
+    "pyobjc-framework-Cocoa>=10.3; sys_platform == 'darwin'",
+]
+
+[project.optional-dependencies]
+# CTranslate2 (faster-whisper) sur GPU charge cuBLAS + cuDNN, qui dépendent
+# eux-mêmes du CUDA runtime (cudart) et de nvrtc. Tout déclarer, sinon échec
+# « cublas… cannot be loaded » faute de dépendance transitive.
+cuda = [
+    "nvidia-cublas-cu12>=12.4",
+    "nvidia-cudnn-cu12>=9.1",
+    "nvidia-cuda-runtime-cu12>=12.4",
+    "nvidia-cuda-nvrtc-cu12>=12.4",
+]
+
+[project.scripts]
+halo = "halo.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["halo"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "RUF"]
+allowed-confusables = ["×", "–", "’", "›", "‹", "−"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["halo"]
+check_untyped_defs = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "halo.core.*"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
